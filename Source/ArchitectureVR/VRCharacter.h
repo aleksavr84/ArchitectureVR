@@ -26,6 +26,7 @@ private:
 	bool FindTeleportDestination(TArray<FVector> &OutPath, FVector &OutLocation);
 	void UpdateDestinationMarker();
 	void UpdateBlinkers();
+	void DrawTeleportPath(const TArray<FVector> &Path);
 	void UpdateSpline(const TArray<FVector> &Path);
 	FVector2D GetBlinkerCenter();
 
@@ -60,6 +61,9 @@ private:
 	UPROPERTY()
 	class UMaterialInstanceDynamic* BlinkerMaterialInstance;
 
+	UPROPERTY()
+	TArray<class USplineMeshComponent*> TeleportPathMeshPool;
+
 	class APlayerController* PlayerController;
 
 private:
@@ -86,4 +90,11 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float ControllerRotation = 0.f;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UStaticMesh* TeleportArchMesh;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UMaterialInterface* TeleportArchMaterial;
+
 };
