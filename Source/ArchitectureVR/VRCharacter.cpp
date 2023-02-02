@@ -6,6 +6,8 @@
 #include "GameFramework/Controller.h"
 #include "Components/CapsuleComponent.h"
 #include "NavigationSystem.h"
+#include "Components/PostProcessComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 AVRCharacter::AVRCharacter()
 {
@@ -19,6 +21,9 @@ AVRCharacter::AVRCharacter()
 
 	DestinationMarker = CreateDefaultSubobject<UStaticMeshComponent>(FName("DestinationMarker"));
 	DestinationMarker->SetupAttachment(GetRootComponent());
+
+	PostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(FName("PostProcessComponent"));
+	PostProcessComponent->SetupAttachment(GetRootComponent());	
 }
 
 void AVRCharacter::BeginPlay()
@@ -26,6 +31,14 @@ void AVRCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	DestinationMarker->SetVisibility(false);
+
+	if (BlinkerMaterialBase)
+	{
+		BlinkerMaterialInstance = UMaterialInstanceDynamic::Create(BlinkerMaterialBase, this);
+		PostProcessComponent->AddOrUpdateBlendable(BlinkerMaterialInstance);
+
+		BlinkerMaterialInstance->SetScalarParameterValue(FName("Radius"), 0.2f);
+	}
 }
 
 void AVRCharacter::Tick(float DeltaTime)
@@ -38,6 +51,7 @@ void AVRCharacter::Tick(float DeltaTime)
 	VRRoot->AddWorldOffset(-NewCameraOffset);
 
 	UpdateDestinationMarker();
+	UpdateBlinkers();
 }
 
 bool AVRCharacter::FindTeleportDestination(FVector& OutLocation)
@@ -85,7 +99,19 @@ void AVRCharacter::UpdateDestinationMarker()
 	{
 		DestinationMarker->SetVisibility(false);
 	}
+}
 
+void AVRCharacter::UpdateBlinkers()
+{
+	if (RadiusVsVelocity == nullptr) return;
+
+	float Speed = GetVelocity().Size();
+	float Radius = RadiusVsVelocity->GetFloatValue(Speed);
+
+	if (BlinkerMaterialInstance)
+	{
+		BlinkerMaterialInstance->SetScalarParameterValue(FName("Radius"), Radius);
+	}
 }
 
 void AVRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
