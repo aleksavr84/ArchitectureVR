@@ -26,6 +26,7 @@ private:
 	bool FindTeleportDestination(FVector &OutLocation);
 	void UpdateDestinationMarker();
 	void UpdateBlinkers();
+	FVector2D GetBlinkerCenter();
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
@@ -36,6 +37,12 @@ private:
 private:
 	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* Camera;
+
+	UPROPERTY(VisibleAnywhere)
+	class UMotionControllerComponent* LeftController;
+
+	UPROPERTY(VisibleAnywhere)
+	UMotionControllerComponent* RightController;
 
 	UPROPERTY(VisibleAnywhere)
 	class USceneComponent* VRRoot;
@@ -66,4 +73,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	class UCurveFloat* RadiusVsVelocity;
+
+	UPROPERTY(EditAnywhere)
+	float ControllerRotation = 0.f;
 };
