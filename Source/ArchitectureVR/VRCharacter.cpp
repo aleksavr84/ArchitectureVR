@@ -8,10 +8,10 @@
 #include "NavigationSystem.h"
 #include "Components/PostProcessComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "MotionControllerComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
+#include "HandController.h"
 
 AVRCharacter::AVRCharacter()
 {
@@ -23,18 +23,8 @@ AVRCharacter::AVRCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(FName("Camera"));
 	Camera->SetupAttachment(VRRoot);
 
-	LeftController = CreateDefaultSubobject<UMotionControllerComponent>(FName("LeftController"));
-	LeftController->SetupAttachment(VRRoot);
-	LeftController->SetTrackingSource(EControllerHand::Left);
-	LeftController->bDisplayDeviceModel = true;
-
-	RightController = CreateDefaultSubobject<UMotionControllerComponent>(FName("RightController"));
-	RightController->SetupAttachment(VRRoot);
-	RightController->SetTrackingSource(EControllerHand::Right);
-	RightController->bDisplayDeviceModel = true;
-
 	TeleportPath = CreateDefaultSubobject<USplineComponent>(FName("TeleportPath"));
-	TeleportPath->SetupAttachment(RightController);
+	TeleportPath->SetupAttachment(VRRoot);
 
 	DestinationMarker = CreateDefaultSubobject<UStaticMeshComponent>(FName("DestinationMarker"));
 	DestinationMarker->SetupAttachment(GetRootComponent());
@@ -54,6 +44,24 @@ void AVRCharacter::BeginPlay()
 		BlinkerMaterialInstance = UMaterialInstanceDynamic::Create(BlinkerMaterialBase, this);
 		PostProcessComponent->AddOrUpdateBlendable(BlinkerMaterialInstance);
 	}
+
+	LeftController = GetWorld()->SpawnActor<AHandController>(HandControllerClass);
+	
+	if (LeftController)
+	{
+		LeftController->AttachToComponent(VRRoot, FAttachmentTransformRules::KeepRelativeTransform);
+		LeftController->SetHand(EControllerHand::Left);
+		LeftController->SetOwner(this);
+	}
+
+	RightController = GetWorld()->SpawnActor<AHandController>(HandControllerClass);
+
+	if (RightController)
+	{
+		RightController->AttachToComponent(VRRoot, FAttachmentTransformRules::KeepRelativeTransform);
+		RightController->SetHand(EControllerHand::Right);
+		RightController->SetOwner(this);
+	}
 }
 
 void AVRCharacter::Tick(float DeltaTime)
@@ -71,9 +79,9 @@ void AVRCharacter::Tick(float DeltaTime)
 
 bool AVRCharacter::FindTeleportDestination(TArray<FVector>& OutPath, FVector& OutLocation)
 {
-	FVector Start = RightController->GetComponentLocation();
-	FVector Look = RightController->GetForwardVector();
-	Look = Look.RotateAngleAxis(ControllerRotation, RightController->GetRightVector());
+	FVector Start = RightController->GetActorLocation();
+	FVector Look = RightController->GetActorForwardVector();
+	Look = Look.RotateAngleAxis(ControllerRotation, RightController->GetActorRightVector());
 
 	FPredictProjectilePathParams Params(
 		TeleportProjectileRadius,

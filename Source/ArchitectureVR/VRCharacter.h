@@ -41,10 +41,10 @@ private:
 	class UCameraComponent* Camera;
 
 	UPROPERTY(VisibleAnywhere)
-	class UMotionControllerComponent* LeftController;
+	class AHandController* LeftController;
 
 	UPROPERTY(VisibleAnywhere)
-	UMotionControllerComponent* RightController;
+	AHandController* RightController;
 
 	UPROPERTY(VisibleAnywhere)
 	class USceneComponent* VRRoot;
@@ -96,5 +96,8 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	class UMaterialInterface* TeleportArchMaterial;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AHandController> HandControllerClass;
 
 };
