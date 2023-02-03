@@ -1,4 +1,7 @@
 #include "HandController.h"
+#include "GameFramework/Controller.h"
+#include "Haptics/HapticFeedbackEffect_Base.h"
+#include "VRCharacter.h"
 
 AHandController::AHandController()
 {
@@ -30,7 +33,18 @@ void AHandController::ActorBeginOverlap(AActor* OverlappedActor, AActor* OtherAc
 
 	if (!bCanClimb && bNewCanClimb)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Can Climb!"));
+		//UE_LOG(LogTemp, Warning, TEXT("Can Climb!"));
+		PlayerController = PlayerController == nullptr ? Cast<APlayerController>(Cast<AVRCharacter>(GetOwner())->Controller) : PlayerController;
+
+		if (PlayerController && HapticEffect)
+		{
+			PlayerController->PlayHapticEffect(
+				HapticEffect,
+				MotionController->GetTrackingSource(),
+				1,
+				false
+			);
+		}
 	}
 
 	bCanClimb = bNewCanClimb;
