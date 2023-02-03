@@ -26,6 +26,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UMotionControllerComponent* MotionController;
 
+	class AVRCharacter* PlayerCharacter;
 	class APlayerController* PlayerController;
 
 	// Callbacks
@@ -40,6 +41,12 @@ private:
 
 	// State
 	bool bCanClimb = false;
+	bool bIsClimbing = false;
+	FVector ClimbingStartLocation;
+	AHandController* OtherController;
+
+	void SetMovementMode(EMovementMode Mode);
+	
 
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -47,5 +54,9 @@ private:
 
 public:
 	void SetHand(EControllerHand Hand) { MotionController->SetTrackingSource(Hand); }
+	void PairController(AHandController* Controller);
+
+	void Grip();
+	void Release();
 	
 };
